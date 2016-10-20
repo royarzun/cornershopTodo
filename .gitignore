@@ -1,0 +1,15 @@
+.DS_Store
+.cache
+.env
+.idea
+.project
+.pydevproject
+
+*.pyc
+*.pyd
+*.egg
+*.eggs
+*.egg-info
+
+build/
+dist/

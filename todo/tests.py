@@ -27,9 +27,7 @@ class RegistroAPITestCase(APITestCase):
         self.assertEqual(len(response.data["token"]), 40)
     def test_registro_usuario_ya_registrado(self):
         """ Dado que intentamos registrar un usuario dos veces, la segunda vez
-        que se hace el request deberia retornar status 400. Este codigo ha sido
-        elegido por el validador del serializador de Registro en
-        'todo.serializers.RegistroSerializer'
+        que se hace el request deberia retornar status 400.'
         """
         response = self.client.post("/registro/", self.dummy_user_uno,
                                     format="json")

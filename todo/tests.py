@@ -56,14 +56,13 @@ class RegistroAPITestCase(APITestCase):
 
 class TareasAPITestCase(APITestCase):
 
-    usuario_dummy = {"username": "royarzun", "password": "foo"}
+    usuario_dummy = {"username": "pepe", "password": "jojojo"}
     tarea_dummy = {"titulo": "tituloFoo", "descripcion": "foo"}
 
     fixtures = ['fixtures.json']
 
     def get_token(self):
-        """Helper para obtener token.
-        """
+        """Helper para obtener token. """
         self.client.post('/registro/', self.usuario_dummy, format="json")
         response = self.client.post('/api-token/', self.usuario_dummy,
                                     format="json")
@@ -77,8 +76,9 @@ class TareasAPITestCase(APITestCase):
         response = self.client.post("/tareas/", self.tarea_dummy, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # probar que se puede obtener de vuelta
-        response = self.client.get("/tareas/")
-        self.assertEqual(len(response.data), 1)
+        id = response.data
+        response = self.client.get("/tareas/"+ str(id))
+        self.assertEqual(response.data["id"], id)
 
     def test_actualizar_tarea_id_valido(self):
         """ Dado que tengo una tarea en la BD, deberia ser capaz de actualizar

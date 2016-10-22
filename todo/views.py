@@ -130,6 +130,8 @@ class TareasView(APIView):
 
 
 class TareaView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, tarea_id):
         """
@@ -165,7 +167,7 @@ class TareaView(APIView):
               message: UNAUTHORIZED, malas credenciales
         """
         try:
-            tarea = TodoTarea.objects.get(id=tarea_id)
+            tarea = TodoTarea.objects.get(id=tarea_id, asignado=request.user.id)
             serializer = TareasSerializer(tarea)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except TodoTarea.DoesNotExist:
@@ -210,7 +212,7 @@ class TareaView(APIView):
         serializer = TareasSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                tarea = TodoTarea.objects.get(id=tarea_id)
+                tarea = TodoTarea.objects.get(id=tarea_id, asignado=request.user.id)
                 for attr, value in serializer.data.items():
                     setattr(tarea, attr, value)
                 tarea.save()

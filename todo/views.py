@@ -67,16 +67,20 @@ class TareasView(APIView):
 
         anteponiendo 'Token ' al string token
         ---
-
         response_serializer: todo.serializers.TareasSerializer
         consumes:
             - application/json
         omit_parameters:
-            -form
+            - form
         parameters:
             - name: Authorization
               paramType: header
               required: true
+        responseMessages:
+            - code: 200
+              message: Ok, retorna tareas de usuario
+            - code: 401
+              message: UNAUTHORIZED, malas credenciales
         """
         tareas = TodoTarea.objects.filter(asignado=request.user.id)
         serializer = TareasSerializer(data=tareas, many=True)
@@ -85,3 +89,46 @@ class TareasView(APIView):
         else:
             # No hay tareas asignadas a este usuario
             return Response(data={}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """
+        Crea una tarea TODO para este usuario.
+
+        Nota para swagger:
+        el argumento de 'Authorization' debe ser entregado de la siguiente forma:
+
+         'Token 14e47cf31935b1de9c007008ef38680de16f24e3'
+
+        anteponiendo 'Token ' al string token
+        ---
+        request_serializer: todo.serializers.TareasSerializer
+        consumes:
+            - application/json
+        omit_parameters:
+            - form
+        parameters:
+            - name: Authorization
+              paramType: header
+              required: true
+            - name: Tarea
+              paramType: body
+              pytype: todo.serializers.TareasSerializer
+              required: true
+        responseMessages:
+            - code: 201
+              message: Created, tarea fue creada
+            - code: 401
+              message: UNAUTHORIZED, malas credenciales
+        """
+        serializer = TareasSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            tarea_data = serializer.data
+            tarea = TodoTarea(asignado=request.user,
+                              titulo=tarea_data["titulo"],
+                              descripcion=tarea_data["descripcion"])
+            tarea.save()
+            return Response(tarea.id, status=status.HTTP_201_CREATED)
+

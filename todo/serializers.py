@@ -16,4 +16,5 @@ class RegistroSerializer(serializers.ModelSerializer):
 class TareasSerializer(serializers.ModelSerializer):
     class Meta:
         model = TodoTarea
-        fields = ("asignado", "titulo", "descripcion", "realizada")
+        fields = ("titulo", "descripcion")
+        read_only_fields = ("id", "asignado", "ultima_actualizacion")

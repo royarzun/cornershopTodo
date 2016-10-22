@@ -20,7 +20,7 @@ class TodoTarea(models.Model):
     """
     asignado = models.ForeignKey(User)
     titulo = models.CharField(max_length=35, blank=False)
-    descripcion = models.TextField(max_length=100, blank=True)
+    descripcion = models.TextField(max_length=100, blank=False)
     realizada = models.BooleanField(default=False)
     ultima_actualizacion = models.DateTimeField(auto_now_add=True)
 

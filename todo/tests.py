@@ -41,9 +41,30 @@ class RegistroAPITestCase(APITestCase):
         self.assertEqual(len(response.data["token"]), 40)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-
     def test_obtener_token_usuario_no_registrado(self):
         response = self.client.post("/api-token/", self.dummy_user_dos, format="json")
         # probar que el key 'token' se encuentra en el response
         self.assertFalse("token" in response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class TareasAPITestCase(APITestCase):
+    usuario_dummy = {"username": "royarzun", "password": "foo"}
+    tarea_dummy = {"titulo": "tituloFoo", "descripcion": "foo"}
+
+    def get_token(self):
+        self.client.post('/registro/', self.usuario_dummy, format="json")
+        response = self.client.post('/api-token/', self.usuario_dummy,
+                                    format="json")
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' +
+                                                   response.data["token"])
+
+    def test_crear_una_tarea_para_usuario_registrado(self):
+        self.get_token()
+        response = self.client.post("/tareas/", self.tarea_dummy, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_crear_tarea_con_datos_invalidos(self):
+        self.get_token()
+        response = self.client.post("/tareas/", {"titulo": 1}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

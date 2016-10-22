@@ -3,10 +3,13 @@
 from django.contrib.auth.models import User
 
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from todo.serializers import RegistroSerializer
+from todo.models import TodoTarea
+from todo.serializers import RegistroSerializer, TareasSerializer
 
 
 class RegistroView(APIView):
@@ -46,3 +49,39 @@ class RegistroView(APIView):
         user.save()
         return Response(data=serializer.validated_data,
                         status=status.HTTP_201_CREATED)
+
+
+class TareasView(APIView):
+    """ View para manipulacion de tareas """
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        Obtiene las tareas registradas a un determinado usuario del sistema.
+
+        Nota para swagger:
+        el argumento de 'Authorization' debe ser entregado de la siguiente forma:
+
+         'Token 14e47cf31935b1de9c007008ef38680de16f24e3'
+
+        anteponiendo 'Token ' al string token
+        ---
+
+        response_serializer: todo.serializers.TareasSerializer
+        consumes:
+            - application/json
+        omit_parameters:
+            -form
+        parameters:
+            - name: Authorization
+              paramType: header
+              required: true
+        """
+        tareas = TodoTarea.objects.filter(asignado=request.user.id)
+        serializer = TareasSerializer(data=tareas, many=True)
+        if serializer.is_valid():
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            # No hay tareas asignadas a este usuario
+            return Response(data={}, status=status.HTTP_200_OK)

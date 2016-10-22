@@ -11,3 +11,9 @@ class RegistroSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("username", "password")
+
+
+class TareasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TodoTarea
+        fields = ("asignado", "titulo", "descripcion", "realizada")

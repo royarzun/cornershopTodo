@@ -1,0 +1,42 @@
+[
+  {
+    "model": "todo.todotarea",
+    "pk": 1,
+    "fields": {
+      "asignado": 2,
+      "titulo": "bla",
+      "descripcion": "bar",
+      "realizada": false,
+      "ultima_actualizacion": "2016-10-22T17:44:30.089Z"
+    }
+  },
+  {
+    "model": "todo.todotarea",
+    "pk": 2,
+    "fields": {
+      "asignado": 2,
+      "titulo": "bla",
+      "descripcion": "bar",
+      "realizada": false,
+      "ultima_actualizacion": "2016-10-22T18:38:58.936Z"
+    }
+  },
+  {
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$24000$s1tFvw4SfzQc$NE4V7ywo5KXhFmqVa7O0UfE19c7Yun0s/K1ghy/8OMM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "pepe",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2016-10-22T18:22:41.351Z",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

@@ -33,6 +33,9 @@ class RegistroAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_obtener_token_usuario_registrado(self):
+        """ Dado que el usuario se encuentra registrado, se prueba la efectiva
+        obtencion de su token.
+        """
         self.client.post("/registro/", self.dummy_user, format="json")
         response = self.client.post("/api-token/", self.dummy_user, format="json")
         # probar que el key 'token' se encuentra en el response
@@ -42,6 +45,9 @@ class RegistroAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_obtener_token_usuario_no_registrado(self):
+        """ Dado que se intenta usar malas credenciales de usuario para obtener
+        un token, el response debe ser status=400 como BAD REQUEST
+        """
         response = self.client.post("/api-token/", self.dummy_user_dos, format="json")
         # probar que el key 'token' se encuentra en el response
         self.assertFalse("token" in response.data)
@@ -49,10 +55,15 @@ class RegistroAPITestCase(APITestCase):
 
 
 class TareasAPITestCase(APITestCase):
+
     usuario_dummy = {"username": "royarzun", "password": "foo"}
     tarea_dummy = {"titulo": "tituloFoo", "descripcion": "foo"}
 
+    fixtures = ['fixtures.json']
+
     def get_token(self):
+        """Helper para obtener token.
+        """
         self.client.post('/registro/', self.usuario_dummy, format="json")
         response = self.client.post('/api-token/', self.usuario_dummy,
                                     format="json")
@@ -60,6 +71,8 @@ class TareasAPITestCase(APITestCase):
                                                    response.data["token"])
 
     def test_crear_una_tarea_para_usuario_registrado(self):
+        """ Dado que un usuario esta registrado, se testea el crear una tarea
+        con input valido"""
         self.get_token()
         response = self.client.post("/tareas/", self.tarea_dummy, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -67,7 +80,23 @@ class TareasAPITestCase(APITestCase):
         response = self.client.get("/tareas/")
         self.assertEqual(len(response.data), 1)
 
-    def test_crear_tarea_con_datos_invalidos(self):
+    def test_actualizar_tarea_id_valido(self):
+        """ Dado que tengo una tarea en la BD, deberia ser capaz de actualizar
+        una tarea sin necesariamente tener que cambiar el estado"""
+        modifificacion = {"descripcion": "Hacer sandwiches"}
         self.get_token()
-        response = self.client.post("/tareas/", {"titulo": 1}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.put("/tareas/2", modifificacion, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get("/tareas/2")
+        self.assertEqual(response.data["descripcion"], "Hacer sandwiches")
+
+    def test_actualizar_tarea_colocando_atributo_tarea_realizada(self):
+        """ Dado que tengo una tarea en la BD, deberia ser capaz de actualizar
+        una tarea a 'realizada' solo usando la id, siendo los demas atributos
+        opcionales"""
+        self.get_token()
+        modifificacion = {"realizada": True}
+        response = self.client.put("/tareas/2", modifificacion, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get("/tareas/2")
+        self.assertTrue(response.data["realizada"])

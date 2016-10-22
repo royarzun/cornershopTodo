@@ -99,6 +99,10 @@ SWAGGER_SETTINGS = {
     'SHOW_REQUEST_HEADERS': True
 }
 
+}
+FIXTURE_DIRS = (
+   os.path.join(BASE_DIR, 'fixtures/'),
+)
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 

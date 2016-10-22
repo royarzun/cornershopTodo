@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^docs/?', include('rest_framework_swagger.urls')),
     url(r'^registro/?$', RegistroView.as_view()),
     url(r'^tareas/?$', TareasView.as_view()),
+    url(r'^tareas/(?P<tarea_id>[0-9]*)$', TareasView.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

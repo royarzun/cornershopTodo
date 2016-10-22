@@ -56,7 +56,7 @@ class TareasView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):
+    def get(self, request, tarea_id=None):
         """
         Obtiene las tareas registradas a un determinado usuario del sistema.
 
@@ -82,9 +82,17 @@ class TareasView(APIView):
             - code: 401
               message: UNAUTHORIZED, malas credenciales
         """
-        tareas = TodoTarea.objects.filter(asignado=request.user)
-        serializer = TareasSerializer(tareas, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        if tarea_id:
+            tarea = TodoTarea.objects.get(id=tarea_id)
+            if tarea:
+                serializer = TareasSerializer(tarea)
+                return Response(data=serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            tareas = TodoTarea.objects.filter(asignado=request.user)
+            serializer = TareasSerializer(tareas, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """
@@ -122,9 +130,7 @@ class TareasView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         else:
             tarea_data = serializer.data
-            tarea = TodoTarea(asignado=request.user,
-                              titulo=tarea_data["titulo"],
-                              descripcion=tarea_data["descripcion"])
+            tarea = TodoTarea(asignado=request.user, **tarea_data)
             tarea.save()
             return Response(tarea.id, status=status.HTTP_201_CREATED)
 

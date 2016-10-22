@@ -90,6 +90,14 @@ class TareasAPITestCase(APITestCase):
         response = self.client.get("/tareas/2")
         self.assertEqual(response.data["descripcion"], "Hacer sandwiches")
 
+    def test_actualizar_tarea_id_invalido(self):
+        """ Dado que tengo una tarea en la BD, deberia ser capaz de actualizar
+        una tarea sin necesariamente tener que cambiar el estado"""
+        modifificacion = {"descripcion": "Hacer sandwiches"}
+        self.get_token()
+        response = self.client.put("/tareas/22", modifificacion, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_actualizar_tarea_colocando_atributo_tarea_realizada(self):
         """ Dado que tengo una tarea en la BD, deberia ser capaz de actualizar
         una tarea a 'realizada' solo usando la id, siendo los demas atributos

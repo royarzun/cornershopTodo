@@ -56,7 +56,7 @@ class TareasView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, tarea_id=None):
+    def get(self, request):
         """
         Obtiene las tareas registradas a un determinado usuario del sistema.
 
@@ -82,17 +82,9 @@ class TareasView(APIView):
             - code: 401
               message: UNAUTHORIZED, malas credenciales
         """
-        if tarea_id:
-            tarea = TodoTarea.objects.get(id=tarea_id)
-            if tarea:
-                serializer = TareasSerializer(tarea)
-                return Response(data=serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-            tareas = TodoTarea.objects.filter(asignado=request.user)
-            serializer = TareasSerializer(tareas, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        tareas = TodoTarea.objects.filter(asignado=request.user)
+        serializer = TareasSerializer(tareas, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """
@@ -121,6 +113,8 @@ class TareasView(APIView):
         responseMessages:
             - code: 201
               message: Created, tarea fue creada
+            - code: 400
+              message: Bad request, tarea no valida
             - code: 401
               message: UNAUTHORIZED, malas credenciales
         """
@@ -134,3 +128,95 @@ class TareasView(APIView):
             tarea.save()
             return Response(tarea.id, status=status.HTTP_201_CREATED)
 
+
+class TareaView(APIView):
+
+    def get(self, request, tarea_id):
+        """
+        Obtiene las tareas registradas a un determinado usuario del sistema.
+
+        Nota para swagger:
+        el argumento de 'Authorization' debe ser entregado de la siguiente forma:
+
+         'Token 14e47cf31935b1de9c007008ef38680de16f24e3'
+
+        anteponiendo 'Token ' al string token
+        ---
+        response_serializer: todo.serializers.TareasSerializer
+        consumes:
+            - application/json
+        omit_parameters:
+            - form
+        parameters:
+            - name: Authorization
+              paramType: header
+              required: true
+            - name: tarea_id
+              description: id de la tarea
+              required: True
+              paramType: path
+              type: int
+        responseMessages:
+            - code: 200
+              message: Ok, retorna tareas de usuario
+            - code: 400
+              message: Bad request, tarea no existe
+            - code: 401
+              message: UNAUTHORIZED, malas credenciales
+        """
+        try:
+            tarea = TodoTarea.objects.get(id=tarea_id)
+            serializer = TareasSerializer(tarea)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        except TodoTarea.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, tarea_id):
+        """ Modifica/Update una tarea existente
+
+        Nota para swagger:
+        el argumento de 'Authorization' debe ser entregado de la siguiente forma:
+
+         'Token 14e47cf31935b1de9c007008ef38680de16f24e3'
+
+        anteponiendo 'Token ' al string token
+        ---
+        request_serializer: todo.serializers.TareasSerializer
+        consumes:
+            - application/json
+        omit_parameters:
+            - form
+        parameters:
+            - name: tarea_id
+              description: id de la tarea
+              required: True
+              paramType: path
+              type: int
+            - name: Authorization
+              paramType: header
+              required: true
+            - name: Tarea
+              paramType: body
+              pytype: todo.serializers.TareasSerializer
+              required: true
+        responseMessages:
+            - code: 200
+              message: Ok, tarea fue modificada
+            - code: 400
+              message: Bad request, tarea a modificar no existe
+            - code: 401
+              message: UNAUTHORIZED, malas credenciales
+        """
+        serializer = TareasSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                tarea = TodoTarea.objects.get(id=tarea_id)
+                for attr, value in serializer.data.items():
+                    setattr(tarea, attr, value)
+                tarea.save()
+                reserializer = TareasSerializer(tarea, many=False)
+                return Response(reserializer.data, status=status.HTTP_200_OK)
+            except TodoTarea.DoesNotExist:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+           return Response(status=status.HTTP_400_BAD_REQUEST)

@@ -17,22 +17,22 @@ class RegistroView(APIView):
         Registra un nuevo usuario, retorna Ok si es que usuario fue creado
         con exito.
         ---
-        parameters_strategy:
-            form: replace
+        request_serializer: todo.serializers.RegistroSerializer
+        response_serializer: todo.serializers.RegistroSerializer
+        consumes:
+            - application/json
+        omit_parameters:
+            - form
         parameters:
-            - name: username
-              type: string
-              description: Nombre de usuario a crear
-              required: True
-            - name: password
-              type: string
-              description: Password correspondiente a este usuario
-              required: True
+            - name: Registro
+              paramType: body
+              pytype: todo.serializers.RegistroSerializer
+              required: true
         responseMessages:
             - code: 201
               message: Created, usuario ha sido creado y registrado en BD
             - code: 400
-              message: Bad Request, faltan datos o datos son no validos
+              message: Bad Request, datos duplicados o no validos
         """
         serializer = RegistroSerializer(data=request.data)
 
@@ -44,4 +44,5 @@ class RegistroView(APIView):
         user = User.objects.create_user(username=user_data["username"])
         user.set_password(user_data["password"])
         user.save()
-        return Response(data="Ok", status=status.HTTP_201_CREATED)
+        return Response(data=serializer.validated_data,
+                        status=status.HTTP_201_CREATED)

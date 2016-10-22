@@ -82,13 +82,9 @@ class TareasView(APIView):
             - code: 401
               message: UNAUTHORIZED, malas credenciales
         """
-        tareas = TodoTarea.objects.filter(asignado=request.user.id)
-        serializer = TareasSerializer(data=tareas, many=True)
-        if serializer.is_valid():
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        else:
-            # No hay tareas asignadas a este usuario
-            return Response(data={}, status=status.HTTP_200_OK)
+        tareas = TodoTarea.objects.filter(asignado=request.user)
+        serializer = TareasSerializer(tareas, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """

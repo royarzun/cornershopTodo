@@ -63,6 +63,9 @@ class TareasAPITestCase(APITestCase):
         self.get_token()
         response = self.client.post("/tareas/", self.tarea_dummy, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # probar que se puede obtener de vuelta
+        response = self.client.get("/tareas/")
+        self.assertEqual(len(response.data), 1)
 
     def test_crear_tarea_con_datos_invalidos(self):
         self.get_token()

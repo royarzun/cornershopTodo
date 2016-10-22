@@ -11,7 +11,7 @@ class RegistroSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("username", "password")
-
+        write_only_fields = ("password",)
 
 class TareasSerializer(serializers.ModelSerializer):
     class Meta:

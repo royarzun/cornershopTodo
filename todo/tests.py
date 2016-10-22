@@ -8,6 +8,7 @@ class RegistroAPITestCase(APITestCase):
 
     dummy_user = {"username": "el_usuario", "password": "la_password"}
     dummy_user_uno = {"username": "el_usuario1", "password": "la_password"}
+    dummy_user_dos = {"username": "el_usuario2", "password": "la_password"}
 
     def test_registro_usuario(self):
         """ Dado que un usuario nuevo se registra, debemos obtener status
@@ -20,11 +21,6 @@ class RegistroAPITestCase(APITestCase):
                                     format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_obtener_token_usuario_registrado(self):
-        self.client.post("/registro/", self.dummy_user, format="json")
-        response = self.client.post("/api-token/", self.dummy_user, format="json")
-        self.assertTrue("token" in response.data)
-        self.assertEqual(len(response.data["token"]), 40)
     def test_registro_usuario_ya_registrado(self):
         """ Dado que intentamos registrar un usuario dos veces, la segunda vez
         que se hace el request deberia retornar status 400.'
@@ -34,4 +30,20 @@ class RegistroAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.post("/registro/", self.dummy_user_uno,
                                     format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_obtener_token_usuario_registrado(self):
+        self.client.post("/registro/", self.dummy_user, format="json")
+        response = self.client.post("/api-token/", self.dummy_user, format="json")
+        # probar que el key 'token' se encuentra en el response
+        self.assertTrue("token" in response.data)
+        # probar tamaño valido del token
+        self.assertEqual(len(response.data["token"]), 40)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+    def test_obtener_token_usuario_no_registrado(self):
+        response = self.client.post("/api-token/", self.dummy_user_dos, format="json")
+        # probar que el key 'token' se encuentra en el response
+        self.assertFalse("token" in response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

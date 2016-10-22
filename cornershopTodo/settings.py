@@ -93,11 +93,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # SWAGGER ###################################################################
 SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': False,
-    'DOC_EXPANSION': 'list',
-    'APIS_SORTER': 'alpha',
-    'SHOW_REQUEST_HEADERS': True
-}
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'in': 'header',
+        }
+    },
+    'JSON_EDITOR': True,
 
 }
 FIXTURE_DIRS = (
